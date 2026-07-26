@@ -1,0 +1,7 @@
+pykrx>=1.2.8
+pandas
+numpy
+matplotlib
+requests
+beautifulsoup4
+jinja2

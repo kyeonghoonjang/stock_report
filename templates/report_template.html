@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>{{ date }} 주식 테마 리포트</title>
+<style>
+  body { font-family: -apple-system, "Malgun Gothic", sans-serif; max-width: 900px; margin: 40px auto; padding: 0 16px; color: #1f2937; }
+  h1 { font-size: 24px; }
+  h2 { font-size: 19px; margin-top: 40px; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; }
+  .meta { color: #6b7280; font-size: 13px; margin-bottom: 24px; }
+  .theme-box { background: #eff6ff; border-radius: 10px; padding: 16px 20px; margin-bottom: 24px; }
+  .stock-card { border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px 22px; margin-bottom: 20px; }
+  .stock-title { font-size: 17px; font-weight: 700; }
+  .badge { display: inline-block; background: #f3f4f6; border-radius: 6px; padding: 2px 8px; font-size: 12px; margin-left: 8px; color: #374151; }
+  .charts { display: flex; gap: 16px; margin: 12px 0; flex-wrap: wrap; }
+  .charts img { border: 1px solid #f0f0f0; border-radius: 6px; }
+  table.info { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 14px; }
+  table.info td { padding: 4px 8px; border-bottom: 1px solid #f3f4f6; }
+  ul.news { margin: 8px 0 0; padding-left: 18px; font-size: 14px; }
+  ul.news a { color: #2563eb; text-decoration: none; }
+  ul.news a:hover { text-decoration: underline; }
+  .empty { color: #9ca3af; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<h1>{{ date }} 국내 주식 테마 리포트</h1>
+<div class="meta">생성 시각: {{ generated_at }} · 데모 버전</div>
+
+<h2>1. 오늘의 주도 테마</h2>
+{% if theme_report %}
+<div class="theme-box">
+  <strong>{{ theme_report.theme.name }}</strong>
+  <span class="badge">등락률 {{ theme_report.theme.change_pct }}%</span>
+  <table class="info">
+    <tr><th style="text-align:left;">종목</th><th style="text-align:left;">거래대금(원)</th></tr>
+    {% for s in theme_report.top_stocks %}
+    <tr><td>{{ s.name }} ({{ s.ticker }})</td><td>{{ "{:,}".format(s.trading_value) }}</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% else %}
+<p class="empty">테마 데이터를 가져오지 못했습니다.</p>
+{% endif %}
+
+<h2>2. 선정 종목 리포트</h2>
+{% if stocks %}
+  {% for stock in stocks %}
+  <div class="stock-card">
+    <div class="stock-title">
+      {{ stock.name }} ({{ stock.ticker }})
+      <span class="badge">52주고가 대비 {{ "%.2f"|format(stock.pct_from_52w_high) }}%</span>
+    </div>
+
+    <div class="charts">
+      <img src="data:image/png;base64,{{ stock.trading_value_chart }}" width="320">
+      <img src="data:image/png;base64,{{ stock.investor_flow_chart }}" width="320">
+    </div>
+
+    <table class="info">
+      <tr><td>금일 거래대금</td><td>{{ "{:,}".format(stock.trading_value.today_value) }} 원</td></tr>
+      <tr><td>최근 5일 평균 거래대금</td><td>{{ "{:,}".format(stock.trading_value.avg_5d_value) }} 원</td></tr>
+      <tr><td>외국인 5일 순매수</td><td>{{ "{:,}".format(stock.investor_flow.foreign) }} 원</td></tr>
+      <tr><td>기관 5일 순매수</td><td>{{ "{:,}".format(stock.investor_flow.institution) }} 원</td></tr>
+      <tr><td>개인 5일 순매수</td><td>{{ "{:,}".format(stock.investor_flow.individual) }} 원</td></tr>
+    </table>
+
+    {% if stock.news %}
+    <ul class="news">
+      {% for n in stock.news %}
+      <li><a href="{{ n.link }}" target="_blank" rel="noopener">{{ n.title }}</a></li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="empty">관련 기사를 찾지 못했습니다 (네이버 API 키 미설정 시 항상 비어 있음).</p>
+    {% endif %}
+  </div>
+  {% endfor %}
+{% else %}
+<p class="empty">조건을 만족하는 종목이 없습니다.</p>
+{% endif %}
+
+</body>
+</html>
