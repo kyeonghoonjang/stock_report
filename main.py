@@ -22,7 +22,7 @@ def run(date: str = None):
 
     # 1. 테마 리포트 (실패해도 종목 리포트는 계속 진행)
     try:
-        theme_report = theme_module.get_theme_report()
+        theme_report = theme_module.get_theme_report(date)
         print(f"주도 테마: {theme_report['theme']['name']} ({theme_report['theme']['change_pct']}%)")
     except Exception:
         print("[경고] 테마 리포트 생성 실패 (네이버 페이지 구조 변경 가능성). 건너뜁니다.")

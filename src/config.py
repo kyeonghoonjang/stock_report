@@ -4,6 +4,12 @@
 """
 import os
 
+from dotenv import load_dotenv
+
+# 프로젝트 루트의 .env 파일을 자동으로 읽어서 환경변수로 등록한다.
+# (VSCode F5 실행뿐 아니라 터미널에서 python main.py로 직접 실행할 때도 동작하게 하기 위함)
+load_dotenv()
+
 # ── 종목 스크리닝 기준 ──────────────────────────────────────
 MARKET = "KOSPI"
 MARKET_CAP_MIN = 300_000_000_000        # 시가총액 하한 (3천억원)
@@ -24,12 +30,13 @@ NAVER_THEME_LIST_URL = "https://finance.naver.com/sise/theme.naver"
 NAVER_THEME_DETAIL_URL = "https://finance.naver.com/sise/sise_group_detail.naver"
 THEME_TOP_STOCK_COUNT = 2    # 주도 테마 내에서 거래대금 상위 몇 종목을 뽑을지
 
-# ── 뉴스 검색 (네이버 검색 Open API) ───────────────────────────
-# https://developers.naver.com 에서 애플리케이션 등록 후 발급받은 값을
+# ── 뉴스 검색 (NAVER API HUB - 네이버 클라우드 플랫폼) ───────────
+# https://www.ncloud.com 콘솔의 NAVER API HUB에서 Application 등록 후 발급받은
+# API Gateway 키(X-NCP-APIGW-API-KEY-ID / X-NCP-APIGW-API-KEY)를
 # 로컬에서는 환경변수로, GitHub Actions에서는 Secrets로 주입합니다.
-NAVER_CLIENT_ID = os.environ.get("NAVER_CLIENT_ID", "")
-NAVER_CLIENT_SECRET = os.environ.get("NAVER_CLIENT_SECRET", "")
-NAVER_NEWS_API_URL = "https://openapi.naver.com/v1/search/news.json"
+NAVER_API_KEY_ID = os.environ.get("NAVER_API_KEY_ID", "")
+NAVER_API_KEY = os.environ.get("NAVER_API_KEY", "")
+NAVER_NEWS_API_URL = "https://naverapihub.apigw.ntruss.com/search/v1/news"
 NEWS_COUNT_PER_STOCK = 3
 
 # ── 출력 경로 (GitHub Pages 배포 대상 폴더) ─────────────────────

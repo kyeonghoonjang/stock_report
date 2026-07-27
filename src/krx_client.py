@@ -26,6 +26,25 @@ def get_ticker_name(ticker: str) -> str:
     return stock.get_market_ticker_name(ticker)
 
 
+def get_ticker_by_name(name: str, date: str, market: str = "ALL") -> str | None:
+    """
+    종목명으로 티커를 찾는다. pykrx는 이 방향의 함수를 제공하지 않아서
+    전체 티커 목록을 순회하며 이름이 정확히 일치하는 티커를 찾는 방식으로 구현.
+    (종목 수가 많아 시간이 좀 걸릴 수 있음 - 자주 조회한다면 캐싱 권장)
+
+    market: "ALL"이면 KOSPI+KOSDAQ 모두, 특정 시장만 찾고 싶으면 "KOSPI"/"KOSDAQ" 지정.
+    반환: 못 찾으면 None. 동명 종목이 여러 개면 첫 번째 매치를 반환.
+    """
+    markets = ["KOSPI", "KOSDAQ"] if market == "ALL" else [market]
+
+    for m in markets:
+        tickers = stock.get_market_ticker_list(date, market=m)
+        for ticker in tickers:
+            if stock.get_market_ticker_name(ticker) == name:
+                return ticker
+    return None
+
+
 def get_market_cap_snapshot(date: str) -> pd.DataFrame:
     """
     해당 일자 코스피 전 종목의 시가총액/거래량/거래대금/상장주식수 스냅샷.
@@ -63,6 +82,15 @@ def get_investor_trading_value(ticker: str, from_date: str, to_date: str) -> pd.
     df = stock.get_market_trading_value_by_date(from_date, to_date, ticker)
     time.sleep(config.REQUEST_DELAY)
     return df
+
+
+def get_ticker_trading_value(ticker: str, date: str) -> int:
+    """개별 종목의 특정 일자 거래대금(원)을 조회."""
+    df = stock.get_market_cap(date, date, ticker)
+    time.sleep(config.REQUEST_DELAY)
+    if df.empty:
+        return 0
+    return int(df["거래대금"].iloc[-1])
 
 
 def n_business_days_ago(date: str, n: int) -> str:

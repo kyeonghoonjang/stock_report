@@ -46,6 +46,21 @@ def build_investor_flow(ticker: str, date: str) -> dict:
     }
 
 
+def build_today_ohlc(screening_info: dict) -> dict:
+    """스크리닝 단계에서 이미 가져온 OHLCV 데이터에서 당일(가장 최근 영업일) 시가/고가/저가/종가를 추출."""
+    ohlcv = screening_info.get("ohlcv")
+    if ohlcv is None or ohlcv.empty:
+        return {"open": 0, "high": 0, "low": 0, "close": 0}
+
+    last = ohlcv.iloc[-1]
+    return {
+        "open": float(last["시가"]),
+        "high": float(last["고가"]),
+        "low": float(last["저가"]),
+        "close": float(last["종가"]),
+    }
+
+
 def build_stock_report_item(ticker: str, screening_info: dict, date: str) -> dict:
     """종목 하나에 대한 리포트 항목 전체를 조립."""
     name = krx.get_ticker_name(ticker)
@@ -54,6 +69,7 @@ def build_stock_report_item(ticker: str, screening_info: dict, date: str) -> dic
         "ticker": ticker,
         "name": name,
         "pct_from_52w_high": screening_info["pct_from_52w_high"],
+        "ohlc": build_today_ohlc(screening_info),
         "trading_value": build_trading_value_stats(ticker, date),
         "investor_flow": build_investor_flow(ticker, date),
         "news": news_module.search_news_for_stock(name),

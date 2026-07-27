@@ -33,9 +33,9 @@
   <strong>{{ theme_report.theme.name }}</strong>
   <span class="badge">등락률 {{ theme_report.theme.change_pct }}%</span>
   <table class="info">
-    <tr><th style="text-align:left;">종목</th><th style="text-align:left;">거래대금(원)</th></tr>
+    <tr><th style="text-align:left;">종목</th><th style="text-align:left;">거래대금(억원)</th></tr>
     {% for s in theme_report.top_stocks %}
-    <tr><td>{{ s.name }} ({{ s.ticker }})</td><td>{{ "{:,}".format(s.trading_value) }}</td></tr>
+    <tr><td>{{ s.name }} ({{ s.ticker }})</td><td>{{ "%.1f"|format(s.trading_value / 100000000) }}</td></tr>
     {% endfor %}
   </table>
 </div>
@@ -53,22 +53,23 @@
     </div>
 
     <div class="charts">
+      <img src="data:image/png;base64,{{ stock.candle_chart }}" width="200">
       <img src="data:image/png;base64,{{ stock.trading_value_chart }}" width="320">
       <img src="data:image/png;base64,{{ stock.investor_flow_chart }}" width="320">
     </div>
 
     <table class="info">
-      <tr><td>금일 거래대금</td><td>{{ "{:,}".format(stock.trading_value.today_value) }} 원</td></tr>
-      <tr><td>최근 5일 평균 거래대금</td><td>{{ "{:,}".format(stock.trading_value.avg_5d_value) }} 원</td></tr>
-      <tr><td>외국인 5일 순매수</td><td>{{ "{:,}".format(stock.investor_flow.foreign) }} 원</td></tr>
-      <tr><td>기관 5일 순매수</td><td>{{ "{:,}".format(stock.investor_flow.institution) }} 원</td></tr>
-      <tr><td>개인 5일 순매수</td><td>{{ "{:,}".format(stock.investor_flow.individual) }} 원</td></tr>
+      <tr><td>금일 거래대금</td><td>{{ "%.1f"|format(stock.trading_value.today_value / 100000000) }} 억원</td></tr>
+      <tr><td>최근 5일 평균 거래대금</td><td>{{ "%.1f"|format(stock.trading_value.avg_5d_value / 100000000) }} 억원</td></tr>
+      <tr><td>외국인 5일 순매수</td><td>{{ "%.1f"|format(stock.investor_flow.foreign / 100000000) }} 억원</td></tr>
+      <tr><td>기관 5일 순매수</td><td>{{ "%.1f"|format(stock.investor_flow.institution / 100000000) }} 억원</td></tr>
+      <tr><td>개인 5일 순매수</td><td>{{ "%.1f"|format(stock.investor_flow.individual / 100000000) }} 억원</td></tr>
     </table>
 
     {% if stock.news %}
     <ul class="news">
       {% for n in stock.news %}
-      <li><a href="{{ n.link }}" target="_blank" rel="noopener">{{ n.title }}</a></li>
+      <li><a href="{{ n.link }}" target="_blank" rel="noopener">{{ n.title }}</a>{% if n.pub_date_display %} <span class="empty">({{ n.pub_date_display }})</span>{% endif %}</li>
       {% endfor %}
     </ul>
     {% else %}
